@@ -1,0 +1,37 @@
+version: '3'
+services:
+  db:
+    image: mariadb:latest
+    restart: always
+    volumes:
+      - ./dbdata:/var/lib/mysql:cached
+    environment:
+      MYSQL_ROOT_PASSWORD: ChangeMoi
+      MYSQL_DATABASE: humhub
+      MYSQL_USER: humhub
+      MYSQL_PASSWORD: ChangeMoi
+  web:
+    image: nginx:stable
+    ports:
+      - "8281:80"
+    restart: always
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:cached
+      - ./www:/var/www/html:cached
+  hum_fpm:
+    depends_on:
+      - db
+      - web
+    build: .
+    expose:
+      - '9000'
+    restart: always
+    volumes:
+      - ./www:/var/www/html:cached
+      - ./php.ini:/usr/local/etc/php/php.ini:cached
+    environment:
+      HUMHUB_DB_USER: humhub
+      HUMHUB_DB_PASSWORD: ChangeMoi
+      HUMHUB_DB_HOST: db:3306
+      HUMHUB_DB_NAME: humhub
+      HUMHUB_AUTO_INSTALL: 1
