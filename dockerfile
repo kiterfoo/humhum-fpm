@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.4.16-fpm-alpine
 
 WORKDIR /application
 # Mise a jour du conteneur Alpine
