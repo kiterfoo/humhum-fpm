@@ -1,4 +1,5 @@
-FROM php:7.4.16-fpm-alpine  # Ajout d'un commentaire pour GIT
+FROM php:7.4.16-fpm-alpine  
+# Ajout d'un commentaire pour GIT
 
 WORKDIR /application
 # Mise a jour du conteneur Alpine
