@@ -1,6 +1,4 @@
-FROM php:7.4.16-fpm-alpine  
-# Ajout d'un commentaire pour GIT
-
+FROM php:8.2-fpm-alpine
 WORKDIR /application
 # Mise a jour du conteneur Alpine
 RUN apk update && apk upgrade
@@ -39,20 +37,21 @@ RUN apk add --no-cache zip libzip-dev && docker-php-ext-configure zip && docker-
 # Installation de l'extention exif
 RUN docker-php-ext-install exif && docker-php-ext-enable exif \
     && rm -rf /tmp/* /var/cache/apk/*
-# Installation de l'extention imagik
-RUN apk add imagemagick imagemagick-libs
-RUN pecl install imagick && docker-php-ext-enable imagick \
-    && rm -rf /tmp/* /var/cache/apk/*
-# Installation de l'extention gmagick
-#RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/edge/community php7 graphicsmagick
-#RUN apk add --update --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing php7-gmagick
+# Installation de l'extension imagick
+RUN apk add --update --no-cache $PHPIZE_DEPS imagemagick imagemagick-libs
+RUN apk add --update --no-cache --virtual .docker-php-imagick-dependencies imagemagick-dev && \
+    pecl install imagick && \
+    docker-php-ext-enable imagick && \
+    apk del .docker-php-imagick-dependencies
 # Installation de l'applis PHP
+# https://download.humhub.com/downloads/install/humhub-1.15.6.tar.gz
 RUN set -eux; \
-	version='1.7.2'; \
-	curl -o humhub.tar.gz -fL "https://www.humhub.com/download/package/humhub-$version.tar.gz"; \
-	tar -xzf humhub.tar.gz -C /usr/src/; \
-	mv /usr/src/humhub-$version /usr/src/humhub; \
-	rm humhub.tar.gz
+        version='1.15.6'; \
+#       curl -o humhub.tar.gz -fL "https://www.humhub.com/download/install/humhub-$version.tar.gz"; \
+        curl -o humhub.tar.gz -fL "https://download.humhub.com/downloads/install/humhub-1.15.6.tar.gz"; \
+        tar -xzf humhub.tar.gz -C /usr/src/; \
+        mv /usr/src/humhub-$version /usr/src/humhub; \
+        rm humhub.tar.gz
 WORKDIR /var/www/html
 COPY docker-entrypoint.sh /entrypoint.sh
 VOLUME /var/www/html
